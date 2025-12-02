@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2026 AI Conference Year Map</title>
+<style>
+        :root {
+            --bg-color: #0B1220;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #E6F1FF;
+            --text-sub: #7A8CA8;
+            --accent-high: #4FD1FF;
+            --accent-med: #9AE6B4;
+            --accent-low: #A78BFA;
+            --border-radius: 6px; /* Slightly sharper for tech feel */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            line-height: 1.4;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .header-content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-high), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header-content p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* --- Main Grid Layout --- */
+        .calendar-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .grid-matrix {
+            display: grid;
+            /* 120px for Row Headers + 12 columns */
+            grid-template-columns: 120px repeat(12, 1fr);
+            gap: 1px; /* Gap for border effect */
+            background-color: var(--card-border); /* Grid lines color */
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .grid-cell {
+            background-color: var(--bg-color); /* Inner cell bg */
+            padding: 10px;
+            min-height: 140px;
+            position: relative;
+        }
+
+        /* Headers */
+        .col-header {
+            background-color: rgba(255, 255, 255, 0.02);
+            text-align: center;
+            padding: 12px 4px;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .row-header {
+            background-color: rgba(255, 255, 255, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centered row labels */
+            padding: 10px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            text-align: center;
+            border-right: 1px solid var(--card-border);
+        }
+
+        /* --- Event Card --- */
+        .event-card {
+            display: block;
+            background: var(--card-bg);
+            border-radius: 4px;
+            padding: 8px 8px 8px 12px;
+            margin-bottom: 6px;
+            position: relative;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.1s, background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .event-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+            z-index: 10;
+        }
+
+        /* Priority Indicators (Left Border) */
+        .event-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 3px;
+            border-radius: 0 2px 2px 0;
+            background-color: var(--text-sub);
+        }
+
+        .priority-High::before { background-color: var(--accent-high); box-shadow: 0 0 6px var(--accent-high); }
+        .priority-Medium::before { background-color: var(--accent-med); }
+        .priority-Low::before { background-color: var(--accent-low); }
+
+        /* TBD Status */
+        .status-TBD {
+            border: 1px dashed var(--text-sub);
+        }
+        
+        .tbd-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 8px;
+            background: var(--text-sub);
+            color: var(--bg-color);
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        /* Card Content */
+        .card-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            font-family: monospace; /* Tech feel for dates */
+        }
+
+        .region-tag {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-left: 4px;
+        }
+
+        .more-events {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            text-align: center;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        /* --- Footer --- */
+        footer {
+            margin-top: 40px;
+            border-top: 1px solid var(--card-border);
+            padding-top: 20px;
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- Responsive List View (<1200px) --- */
+        .list-view-container {
+            display: none;
+        }
+
+        @media (max-width: 1200px) {
+            .calendar-container { display: none; }
+            .list-view-container { display: block; }
+
+            .month-section {
+                margin-bottom: 30px;
+            }
+
+            .month-title {
+                font-size: 1.2rem;
+                color: var(--accent-high);
+                margin-bottom: 15px;
+                border-bottom: 1px solid var(--card-border);
+                padding-bottom: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+            
+            .month-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 12px;
+            }
+
+            .event-card {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid var(--card-border);
+                padding: 12px;
+            }
+            
+            .event-card::before {
+                left: -1px;
+                top: -1px;
+                bottom: -1px;
+                width: 4px;
+                border-radius: 4px 0 0 4px;
+            }
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+            header h1 {
+                background: none;
+                -webkit-text-fill-color: black;
+                color: black;
+            }
+            .grid-matrix {
+                background-color: #ccc;
+                border: 1px solid #ccc;
+            }
+            .grid-cell, .row-header, .col-header {
+                background-color: white;
+                color: black;
+            }
+            .event-card {
+                background: white;
+                border: 1px solid #ddd;
+                color: black;
+            }
+            .card-meta, .header-content p, .legend {
+                color: #555;
+            }
+            .priority-High::before { background-color: #000; box-shadow: none; } /* High contrast for print */
+            .priority-Medium::before { background-color: #666; }
+            .priority-Low::before { background-color: #999; }
+            
+            /* Force Grid view on print even if screen is small, if page size allows, otherwise list */
+            @page { size: A4 landscape; margin: 1cm; }
+            .calendar-container { display: block !important; }
+            .list-view-container { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+<header>
+<div class="header-content">
+<h1>2026 AI Conference Year Map</h1>
+<p>Global events overview by Month &amp; Category • Generated based on internal CSV data</p>
+</div>
+<div class="legend">
+<div class="legend-item"><span class="dot" style="background: var(--accent-high); box-shadow: 0 0 4px var(--accent-high);"></span> High Priority</div>
+<div class="legend-item"><span class="dot" style="background: var(--accent-med);"></span> Medium</div>
+<div class="legend-item"><span class="dot" style="background: var(--accent-low);"></span> Low</div>
+<div class="legend-item"><span class="dot" style="border: 1px dashed var(--text-sub); background: transparent; width: 6px; height: 6px;"></span> TBD</div>
+</div>
+</header>
+<main>
+<!-- Desktop Grid View -->
+<div class="calendar-container" id="gridContainer">
+<!-- JS will populate this -->
+</div>
+<!-- Mobile/Tablet List View -->
+<div class="list-view-container" id="listContainer">
+<!-- JS will populate this -->
+</div>
+</main>
+<footer>
+<div>Data Source: Cleaned CSV Export (clean_conferences.csv)</div>
+<div>Generated by Polaris • 2025/11/30</div>
+</footer>
+<script>
+        // --- Data Configuration (Injected from CSV Analysis) ---
+        // Note: Months are 1-12.
+        const conferences = [
+            // --- Q1 ---
+            { name: "AAAI Conference on AI", short: "AAAI-26", start: "2026-01-20", end: "", month: 1, type: "Academic", priority: "High", city: "Singapore", country: "SG", confirmed: "Yes", url: "https://www.google.com/search?q=AAAI+Conference+on+AI+official+site" },
+            { name: "Sundance Film Festival", short: "Sundance", start: "2026-01-22", end: "", month: 1, type: "General Tech", priority: "Medium", city: "Park City", country: "US", confirmed: "Yes", url: "https://festival.sundance.org/" },
+            { name: "NAMM Show", short: "NAMM", start: "2026-01-20", end: "", month: 1, type: "Industry", priority: "Low", city: "Anaheim", country: "US", confirmed: "Yes", url: "https://www.namm.org/thenammshow" },
+            { name: "CES 2026", short: "CES", start: "2026-01-06", end: "2026-01-09", month: 1, type: "General Tech", priority: "High", city: "Las Vegas", country: "US", confirmed: "Yes", url: "https://www.ces.tech" },
+            
+            { name: "AI DevWorld", short: "AI DevWorld", start: "2026-02-18", end: "", month: 2, type: "Startup & Dev", priority: "Medium", city: "Santa Clara", country: "US", confirmed: "Yes", url: "https://aidevworld.com/" },
+            { name: "Mobile World Congress", short: "MWC", start: "2026-02-23", end: "2026-02-26", month: 2, type: "Industry", priority: "Medium", city: "Barcelona", country: "ES", confirmed: "Yes", url: "https://www.mwcbarcelona.com/" },
+
+            { name: "NVIDIA GTC", short: "NVIDIA GTC", start: "2026-03-16", end: "2026-03-19", month: 3, type: "Enterprise AI", priority: "High", city: "San Jose", country: "US", confirmed: "Yes", url: "https://www.nvidia.com/gtc/" },
+            { name: "SXSW", short: "SXSW", start: "2026-03-12", end: "", month: 3, type: "General Tech", priority: "Medium", city: "Austin", country: "US", confirmed: "Yes", url: "https://www.sxsw.com/" },
+            { name: "RSA Conference", short: "RSA", start: "2026-03-23", end: "", month: 3, type: "Industry", priority: "Medium", city: "San Francisco", country: "US", confirmed: "Yes", url: "https://www.rsaconference.com/" },
+
+            // --- Q2 ---
+            { name: "Google Cloud Next", short: "Cloud Next", start: "2026-04-22", end: "", month: 4, type: "Enterprise AI", priority: "High", city: "Las Vegas", country: "US", confirmed: "Yes", url: "https://cloud.withgoogle.com/next" },
+            { name: "NAB Show", short: "NAB Show", start: "2026-04-14", end: "", month: 4, type: "Industry", priority: "Low", city: "Las Vegas", country: "US", confirmed: "Yes", url: "https://nabshow.com/" },
+            { name: "ICLR 2026", short: "ICLR", start: "2026-04-25", end: "2026-04-29", month: 4, type: "Academic", priority: "High", city: "TBD", country: "EU", confirmed: "TBD", url: "https://iclr.cc/" }, // Inferred
+
+            { name: "Microsoft Build", short: "MS Build", start: "2026-05-19", end: "", month: 5, type: "Startup & Dev", priority: "High", city: "Seattle", country: "US", confirmed: "TBD", url: "https://build.microsoft.com/" }, // Inferred
+
+            { name: "CVPR 2026", short: "CVPR", start: "2026-06-14", end: "2026-06-18", month: 6, type: "Academic", priority: "High", city: "Nashville", country: "US", confirmed: "TBD", url: "https://cvpr.thecvf.com/" }, // Inferred
+            { name: "Apple WWDC", short: "WWDC", start: "2026-06-08", end: "", month: 6, type: "General Tech", priority: "High", city: "Cupertino", country: "US", confirmed: "TBD", url: "https://developer.apple.com/wwdc/" }, // Inferred
+            { name: "Data + AI Summit", short: "Data+AI", start: "2026-06-10", end: "", month: 6, type: "Enterprise AI", priority: "Medium", city: "San Francisco", country: "US", confirmed: "TBD", url: "https://www.databricks.com/dataaisummit" },
+
+            // --- Q3 ---
+            { name: "ICML 2026", short: "ICML", start: "2026-07-12", end: "", month: 7, type: "Academic", priority: "High", city: "Vienna", country: "AT", confirmed: "TBD", url: "https://www.google.com/search?q=ICML+2026+official+site" }, // Inferred
+
+            { name: "SIGGRAPH", short: "SIGGRAPH", start: "2026-08-09", end: "", month: 8, type: "Academic", priority: "Medium", city: "Los Angeles", country: "US", confirmed: "TBD", url: "https://www.google.com/search?q=SIGGRAPH+official+site" },
+            { name: "KDD 2026", short: "KDD", start: "2026-08-01", end: "", month: 8, type: "Academic", priority: "Medium", city: "TBD", country: "", confirmed: "TBD", url: "https://www.google.com/search?q=KDD+2026+official+site" },
+
+            { name: "IFA Berlin", short: "IFA", start: "2026-09-04", end: "", month: 9, type: "General Tech", priority: "Low", city: "Berlin", country: "DE", confirmed: "Yes", url: "https://www.ifa-berlin.com/" },
+            { name: "Dreamforce", short: "Dreamforce", start: "2026-09-22", end: "", month: 9, type: "Enterprise AI", priority: "High", city: "San Francisco", country: "US", confirmed: "TBD", url: "https://www.salesforce.com/dreamforce/" },
+
+            // --- Q4 ---
+            { name: "500 Global Demo Day", short: "500 Global", start: "2026-10-07", end: "", month: 10, type: "Startup & Dev", priority: "Medium", city: "San Francisco", country: "US", confirmed: "Yes", url: "https://500.co/" },
+            { name: "TechCrunch Disrupt", short: "TC Disrupt", start: "2026-10-13", end: "", month: 10, type: "Startup & Dev", priority: "High", city: "San Francisco", country: "US", confirmed: "Yes", url: "https://techcrunch.com/events/disrupt/" },
+            { name: "LA Tech Week", short: "LA Tech Week", start: "2026-10-13", end: "", month: 10, type: "General Tech", priority: "Medium", city: "Los Angeles", country: "US", confirmed: "TBD", url: "https://tech-week.com/los-angeles" },
+            { name: "Austin Tech Week", short: "Austin Tech", start: "2026-10-20", end: "", month: 10, type: "General Tech", priority: "Medium", city: "Austin", country: "US", confirmed: "Yes", url: "https://tech-week.com/austin" },
+            { name: "TEDAI", short: "TEDAI", start: "2026-10-21", end: "", month: 10, type: "General Tech", priority: "Medium", city: "San Francisco", country: "US", confirmed: "Yes", url: "https://events.ted.com/tedai" },
+            { name: "Oracle CloudWorld", short: "CloudWorld", start: "2026-10-26", end: "", month: 10, type: "Enterprise AI", priority: "Medium", city: "Las Vegas", country: "US", confirmed: "Yes", url: "https://www.oracle.com/cloudworld/" },
+            { name: "Adobe MAX", short: "Adobe MAX", start: "2026-10-28", end: "", month: 10, type: "General Tech", priority: "Medium", city: "TBD", country: "", confirmed: "TBD", url: "https://max.adobe.com/" },
+
+            { name: "Web Summit", short: "Web Summit", start: "2026-11-03", end: "", month: 11, type: "General Tech", priority: "Medium", city: "Lisbon", country: "PT", confirmed: "Yes", url: "https://websummit.com/" },
+            { name: "KubeCon NA", short: "KubeCon", start: "2026-11-10", end: "", month: 11, type: "Startup & Dev", priority: "Medium", city: "Detroit", country: "US", confirmed: "Yes", url: "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/" },
+
+            { name: "NeurIPS 2026", short: "NeurIPS", start: "2026-12-08", end: "2026-12-14", month: 12, type: "Academic", priority: "High", city: "San Diego", country: "US", confirmed: "TBD", url: "https://neurips.cc/" },
+            { name: "AWS re:Invent", short: "re:Invent", start: "2026-12-02", end: "", month: 12, type: "Enterprise AI", priority: "High", city: "Las Vegas", country: "US", confirmed: "TBD", url: "https://reinvent.awsevents.com/" },
+        ];
+
+        const ROW_TYPES = ["Academic", "Enterprise AI", "Startup & Dev", "General Tech", "Industry"];
+        const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        // --- Render Functions ---
+
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            const [y, m, d] = dateStr.split('-');
+            return `${m}/${d}`;
+        }
+
+        function createCard(event) {
+            const isTBD = event.confirmed === 'TBD';
+            const dates = event.end ? `${formatDate(event.start)}–${formatDate(event.end)}` : formatDate(event.start);
+            const tag = event.url && event.url !== '#' ? 'a' : 'div';
+            const href = tag === 'a' ? `href="${event.url}" target="_blank"` : '';
+            
+            return `
+                <${tag} ${href} class="event-card priority-${event.priority} ${isTBD ? 'status-TBD' : ''}">
+                    ${isTBD ? '<span class="tbd-badge">TBD</span>' : ''}
+                    <span class="card-title" title="${event.name}">${event.short || event.name}</span>
+                    <div class="card-meta">
+                        <span>${dates}</span>
+                        <span>${event.city} <span class="region-tag">${event.country}</span></span>
+                    </div>
+                </${tag}>
+            `;
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('gridContainer');
+            const matrix = document.createElement('div');
+            matrix.className = 'grid-matrix';
+
+            // 1. Render Header Row (Empty + Months)
+            const emptyCorner = document.createElement('div');
+            emptyCorner.className = 'col-header';
+            emptyCorner.innerText = 'TYPE \\ MON';
+            matrix.appendChild(emptyCorner);
+
+            MONTHS.forEach(m => {
+                const col = document.createElement('div');
+                col.className = 'col-header';
+                col.innerText = m;
+                matrix.appendChild(col);
+            });
+
+            // 2. Render Rows (Type + Cells)
+            ROW_TYPES.forEach(type => {
+                // Row Header
+                const rowHeader = document.createElement('div');
+                rowHeader.className = 'row-header';
+                rowHeader.innerText = type;
+                matrix.appendChild(rowHeader);
+
+                // Month Cells
+                for (let m = 1; m <= 12; m++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+
+                    // Filter events for this cell
+                    const cellEvents = conferences.filter(e => e.month === m && (e.type === type || (!e.type && type === 'General Tech'))); // Fallback for missing type
+                    
+                    // Sort: High > Medium > Low, then by date
+                    const priorityOrder = { "High": 3, "Medium": 2, "Low": 1 };
+                    cellEvents.sort((a, b) => {
+                        const pDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+                        if (pDiff !== 0) return pDiff;
+                        return a.start.localeCompare(b.start);
+                    });
+
+                    // Render max 2-3 events
+                    const MAX_SHOW = 2; // Keep it clean
+                    cellEvents.slice(0, MAX_SHOW).forEach(evt => {
+                        cell.innerHTML += createCard(evt);
+                    });
+
+                    if (cellEvents.length > MAX_SHOW) {
+                        const more = document.createElement('div');
+                        more.className = 'more-events';
+                        more.innerText = `+${cellEvents.length - MAX_SHOW} more`;
+                        cell.appendChild(more);
+                    }
+
+                    matrix.appendChild(cell);
+                }
+            });
+
+            container.appendChild(matrix);
+        }
+
+        function renderList() {
+            const container = document.getElementById('listContainer');
+            
+            for (let m = 1; m <= 12; m++) {
+                const monthEvents = conferences.filter(e => e.month === m);
+                if (monthEvents.length === 0) continue;
+
+                const section = document.createElement('div');
+                section.className = 'month-section';
+                
+                section.innerHTML = `
+                    <div class="month-title">
+                        <span>${MONTHS[m-1]}</span>
+                        <span style="font-size:0.8rem; opacity:0.6;">2026</span>
+                    </div>
+                    <div class="month-grid">
+                        ${monthEvents.sort((a,b) => a.start.localeCompare(b.start)).map(evt => createCard(evt)).join('')}
+                    </div>
+                `;
+                container.appendChild(section);
+            }
+        }
+
+        // --- Init ---
+        renderGrid();
+        renderList();
+
+    </script>
+</body>
+</html>
